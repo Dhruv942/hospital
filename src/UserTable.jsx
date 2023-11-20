@@ -1,152 +1,129 @@
-import React from 'react';
-import { useTable, useSortBy } from 'react-table';
-import './Usertable.css';
-import { useNavigate } from 'react-router-dom'; // Assuming you are using React Router for navigation
+import React, { useEffect, useState } from "react";
+import "./Usertable.css";
+import { useNavigate } from "react-router-dom";
 
 const UserTable = () => {
-  const navigate = useNavigate();
-  const data = React.useMemo(
-    () => [
-      {
-        id: 1,
-        name: 'John Doe',
-        mobileNumber: '123-456-7890',
-        admittedDate: '2023-01-15',
-        temperature: '98.6°F',
-        heartRate: '72 bpm',
-      },
-      {
-        id: 2,
-        name: 'Jane Smith',
-        mobileNumber: '987-654-3210',
-        admittedDate: '2023-02-20',
-        temperature: '99.2°F',
-        heartRate: '85 bpm',
-      },
-      // Add more data as needed
-    ],
-    []
-  );
+    const navigate = useNavigate();
 
-  const columns = React.useMemo(
-    () => [
-      {
-        Header: 'ID',
-        accessor: 'id',
-      },
-      {
-        Header: 'Name',
-        accessor: 'name',
-      },
-      {
-        Header: 'Mobile Number',
-        accessor: 'mobileNumber',
-      },
-      {
-        Header: 'Admitted Date',
-        accessor: 'admittedDate',
-      },
-      {
-        Header: 'Temperature',
-        accessor: 'temperature',
-        Cell: ({ row }) => (
-          <button onClick={() => handleTemperature(row.original)}>Check</button>
-        ),
-      },
-      {
-        Header: 'Heart Rate',
-        accessor: 'heartRate',
-        Cell: ({ row }) => (
-          <button onClick={() => handleHeartRate(row.original)}>Check</button>
-        ),
-      },
-      {
-        Header: 'Edit Button',
-        accessor: 'editButton',
-        disableSortBy: true,
-        Cell: ({ row }) => (
-          <button onClick={() => handleEdit(row.original)}>Edit</button>
-        ),
-      },
-      // New "Bill" button column
-      {
-        Header: 'Bill',
-        accessor: 'billButton',
-        disableSortBy: true,
-        Cell: ({ row }) => (
-          <button onClick={() => handleBill(row.original)}>Bill</button>
-        ),
-      },
-    ],
-    []
-  );
+    const [data, setPatientData] = useState([]);
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-  } = useTable(
-    {
-      columns,
-      data,
-    },
-    useSortBy
-  );
+    useEffect(() => {
+        (async function () {
+            const response = await fetch("http://localhost:8081/get_admits");
+            const json = await response.json();
+            console.log(json);
+            setPatientData(json);
+        })();
+    }, []);
 
-  const handleTemperature = (userData) => {
-    console.log('Temperature for user:', userData);
-    navigate(`/temperature?name=${userData.name}`);
-  };
+    // const data = [
+    //     {
+    //         id: 1,
+    //         name: "John Doe",
+    //         mobileNumber: "123-456-7890",
+    //         admittedDate: "2023-01-15",
+    //         temperature: "98.6°F",
+    //         heartRate: "72 bpm"
+    //     }
+    //     // Add more data as needed
+    // ];
 
-  const handleHeartRate = (userData) => {
-    console.log('Heart Rate for user:', userData);
-    navigate(`/heartrate?name=${userData.name}`);
-  };
+    const handleTemperature = (patientId, patientName, admitId) => {
+        navigate(
+            `/temperature?admitId=${admitId}&patientId=${patientId}&patientName=${patientName}`
+        );
+    };
 
-  const handleEdit = (userData) => {
-    console.log('Edit user:', userData);
-  };
+    const handleHeartRate = (userData) => {
+        console.log("Heart Rate for user:", userData);
+        navigate(`/heartrate?name=${userData.name}`);
+    };
 
-  const handleBill = (userData) => {
-    console.log('Generate Bill for user:', userData);
-    navigate(`/bill?name=${userData.name}`);
-    // Implement your bill functionality here, e.g., open a modal with billing data.
-  };
+    const handleDischarge = async (admitId, index) => {
+        let response = await fetch("http://localhost:8081/discharge_patient", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ admitId })
+        });
+        let result = await response.json();
+        if (result.status === "success") {
+            setPatientData((old) => old.filter((item, idx) => idx != index));
+        } else if (result.status === "failed") {
+            alert(result.msg);
+        } else {
+            alert("Error occured");
+            console.log(result);
+        }
+    };
 
-  return (
-    <div className="main-container">
-      <table {...getTableProps()} className="table">
-        <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                  {column.render('Header')}
-                  <span>
-                    {column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}
-                  </span>
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row) => {
-            prepareRow(row);
-            return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map((cell) => (
-                  <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                ))}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
+    const handleBill = (userData) => {
+        console.log("Generate Bill for user:", userData);
+        navigate(`/bill?name=${userData.name}`);
+        // Implement your bill functionality here, e.g., open a modal with billing data.
+    };
+
+    return (
+        <div className="main-container">
+            <table className="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Mobile Number</th>
+                        <th>Admitted Date</th>
+                        <th>Temperature</th>
+                        <th>Heart Rate</th>
+                        <th>Discharge </th>
+                        <th>Bill</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {data.map((row, index) => (
+                        <tr key={index}>
+                            <td>{row._id + 1}</td>
+                            <td>{row.patientId.name}</td>
+                            <td>{row.patientId.mobileNumber}</td>
+                            <td>{row.admitDate}</td>
+                            <td>
+                                <button
+                                    onClick={() =>
+                                        handleTemperature(
+                                            index + 1,
+                                            row.patientId.name,
+                                            row._id
+                                        )
+                                    }
+                                >
+                                    Check
+                                </button>
+                            </td>
+                            <td>
+                                <button onClick={() => handleHeartRate(row)}>
+                                    Check
+                                </button>
+                            </td>
+                            <td>
+                                <button
+                                    onClick={() =>
+                                        handleDischarge(row._id, index)
+                                    }
+                                >
+                                    Discharge
+                                </button>
+                            </td>
+                            <td>
+                                <button onClick={() => handleBill(row)}>
+                                    Bill
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
 };
 
 export default UserTable;

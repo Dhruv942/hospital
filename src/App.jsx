@@ -11,6 +11,7 @@ import UserTable from './UserTable';
 import Patient from './patient';
 import BillingSystem from './BillingSystem';
 import Heartrate from './heartrate';
+import ShowDetails from './ShowDetails';
 
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
           <Route exact path="/bill" element={<BillingSystem/>} />
           <Route exact path="/temperature" element={<Temperature/>} />
           <Route exact path="/heartrate" element={<Heartrate/>} />
+          <Route exact path="/showdetails" element={<ShowDetails/>} />
           
         </Routes>
       </div>

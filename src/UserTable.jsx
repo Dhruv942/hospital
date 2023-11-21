@@ -39,17 +39,17 @@ const UserTable = () => {
         navigate(`/heartrate?name=${userData.name}`);
     };
 
-    const handleDischarge = async (admitId, index) => {
+    const handleDischarge = async (userData, index) => {
         let response = await fetch("http://localhost:8081/discharge_patient", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ admitId })
+            body: JSON.stringify({ admitId:userData._id })
         });
         let result = await response.json();
         if (result.status === "success") {
-            setPatientData((old) => old.filter((item, idx) => idx != index));
+            navigate(`/bill?admitId=${userData._id}&name=${userData.patientId.name}&patientId=${userData.patientId._id}`);
         } else if (result.status === "failed") {
             alert(result.msg);
         } else {
@@ -58,11 +58,7 @@ const UserTable = () => {
         }
     };
 
-    const handleBill = (userData) => {
-        console.log("Generate Bill for user:", userData);
-        navigate(`/bill?name=${userData.name}`);
-        // Implement your bill functionality here, e.g., open a modal with billing data.
-    };
+  
 
     return (
         <div className="main-container">
@@ -76,7 +72,7 @@ const UserTable = () => {
                         <th>Temperature</th>
                         <th>Heart Rate</th>
                         <th>Discharge </th>
-                        <th>Bill</th>
+                       
                     </tr>
                 </thead>
                 <tbody>
@@ -107,17 +103,13 @@ const UserTable = () => {
                             <td>
                                 <button
                                     onClick={() =>
-                                        handleDischarge(row._id, index)
+                                        handleDischarge(row, index)
                                     }
                                 >
                                     Discharge
                                 </button>
                             </td>
-                            <td>
-                                <button onClick={() => handleBill(row)}>
-                                    Bill
-                                </button>
-                            </td>
+                        
                         </tr>
                     ))}
                 </tbody>

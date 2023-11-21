@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import "./patient.css"
 
 const Patient = () => {
     const [patientsData, setPatientData] = useState([]);
@@ -187,18 +188,11 @@ const Patient = () => {
                                 }}
                             >
                                 {/* Pass the entire patient object to the ShowDetails component */}
-                                <Link
-                                    to={{
-                                        pathname: "/show-details",
-                                        state: { patient }
-                                    }}
+                                <a className="show"
+                                        href={ `/showdetails?patientId=${patient._id}&patientName=${patient.name}`}
                                 >
-                                    <button
-                                        onClick={() => showDetails(patient)}
-                                    >
-                                        Show Details
-                                    </button>
-                                </Link>
+                                   Show Details
+                                </a>
                             </td>
                         </tr>
                     ))}

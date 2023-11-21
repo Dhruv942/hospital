@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './BillingSystem.css';
+import { useSearchParams } from 'react-router-dom';
 
 const BillingSystem = () => {
+
+  const [searchParams, setSearchParams]  = useSearchParams();
+  const [data, setPatientData] = useState([]);
+
   const [admissionFees, setAdmissionFees] = useState('');
   const [consultationFees, setConsultationFees] = useState('');
   const [roomCharge, setRoomCharge] = useState('');
@@ -19,6 +24,22 @@ const BillingSystem = () => {
   const [otherCharges, setOtherCharges] = useState('');
   const [day, setDay] = useState('');
   const [totalCost, setTotalCost] = useState(0);
+
+  useEffect(() => {
+    (async function () {
+        const response = await fetch("http://localhost:8081/get_admit",{
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ admitId: searchParams.get('admitId')})
+          }
+        );
+        const json = await response.json();
+        console.log(json);
+        setPatientData(json.data);
+    })();
+}, []);
 
   const calculateTotalCost = () => {
     const admissionFeesCost = parseFloat(admissionFees) || 0;
@@ -86,15 +107,15 @@ const BillingSystem = () => {
           </tr>
           <tr className="patient-details">
             <td colSpan="4" className="patient-details-cell">
-              Patient Name: Dhruv
-              Bill No: 01
-              Patient ID: 01
+              Patient Name: {searchParams.get('name')} &nbsp;
+              Bill No: {searchParams.get('admitId') + 1} &nbsp;
+              Patient ID: {searchParams.get('patientId') + 1}
             </td>
           </tr>
           <tr className="patient-details">
             <td colSpan="4" className="patient-details-cell">
-              Admitted Date: 11-10-2023
-              Discharge Date: 11-10-2023
+              Admitted Date: {data.admitDate} &nbsp;
+              Discharge Date:{data.dischargeDate}
             </td>
           </tr>
           <tr className="table-header">

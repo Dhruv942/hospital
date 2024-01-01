@@ -37,16 +37,7 @@ function Sidebar({openSidebarToggle, OpenSidebar}) {
                 </Link>
             </li>
            
-            <li className='sidebar-list-item'>
-                <Link to="/bill">
-                    <BsMenuButtonWideFill className='icon'/> Billing
-                </Link>
-            </li>
-            <li className='sidebar-list-item'>
-                <Link to="">
-                    <BsFillGearFill className='icon'/> Setting
-                </Link>
-            </li>
+            
         </ul>
     </aside>
   )
